@@ -1,0 +1,47 @@
+pipeline {
+	agent any
+		stages {
+
+			stage("Generic Inputs") {
+				input {
+					message "Select what task you want to perform ?"
+					parameters {
+						booleanParam(defaultValue: 'false', description: 'Build', name: 'build')
+						booleanParam(defaultValue: 'false', description: 'Clean', name: 'clean')
+						}
+					}
+					steps {
+					script {	
+						env_build = "${build}"
+						env_clean = "${clean}"
+						}
+					}
+				}
+
+			stage("Build") {
+				steps {
+					script {
+						if (env_build == 'true') {
+						sh '''
+						echo "Build java artifact"
+						cd ${WORKSPACE}/maven/ && mvn package
+						'''
+						}
+					}
+				}
+			}
+
+			stage("Clean") {
+				steps {
+					script {
+						if (env_clean == 'true') {
+						sh '''
+						echo "Build java artifact"
+						cd ${WORKSPACE}/maven && mvn clean
+						'''
+						}
+					}
+				}
+			}
+		}
+	}
