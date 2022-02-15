@@ -1,0 +1,32 @@
+pipeline {
+	agent any
+		stages {
+			stage("Generic Inputs") {
+				input {
+					message "Provide machine ip or dns name ?"
+					parameters {
+						string(defaultValue: '', description: 'Sample I/P xx.xx.xx.xx', name: 'Hostname', trim: true)
+						}
+					}
+					steps {
+					script {	
+						sh '''
+						echo "Copying parameters to host file"
+						echo ${Hostname} >> ${WORKSPACE}/hosts;
+						'''
+						}
+					}
+				}
+			
+			stage("Ansible") {
+				steps {
+					script {
+						sh '''
+						echo "Executing playbook"
+						sudo ansible-playbook ${WORKSPACE}/Ansible/apache2.yml -i hosts --key-file "/home/ubuntu/jenkins_project/standard-build/Ansible/Example-2/devops.pem"
+						'''
+						}
+					}
+				}
+			}
+		}
