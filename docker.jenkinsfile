@@ -1,0 +1,44 @@
+pipeline {
+	agent any
+		stages {
+			stage("Generic Inputs") {
+				input {
+					message "Enter your docker_image name and tag"
+					parameters {
+						string(defaultValue: '', description: 'custom docker image name', name: 'image', trim: true)
+						string(defaultValue: '', description: 'docker image tag name', name: 'tag', trim: true)
+						}
+					}
+					steps {
+					script {	
+						env_image = "${image}"
+						env_tag = "${tag}"
+						}
+					}
+				}
+			
+			stage("Docker build") {
+				steps {
+					script {
+						sh '''
+						echo "Executing docker file"
+						cd ${WORKSPACE}/docker/ && sudo docker build -t '''+env_image+''':'''+env_tag+''' .
+						'''
+						}
+					}
+				}
+
+			stage("Docker push") {
+				steps {
+					script {
+						sh '''
+						echo "create container from image"
+						sudo docker run -t -d --name mytemp '''+env_image+''':'''+env_tag+'''
+						echo "docker commit"
+						sudo docker commit mytemp vikramkapoor80/'''+env_image+'''-1.0
+						'''
+						}
+					}
+				}
+			}
+		}
